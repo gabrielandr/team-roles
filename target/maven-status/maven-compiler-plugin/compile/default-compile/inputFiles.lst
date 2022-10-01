@@ -1,0 +1,7 @@
+/opt/gabrielandrade/projetos/team-roles/src/main/java/com/ecore/teamroles/service/RoleService.java
+/opt/gabrielandrade/projetos/team-roles/src/main/java/com/ecore/teamroles/repository/RoleRepository.java
+/opt/gabrielandrade/projetos/team-roles/src/main/java/com/ecore/teamroles/TeamRolesApplication.java
+/opt/gabrielandrade/projetos/team-roles/src/main/java/com/ecore/teamroles/service/RoleServiceImpl.java
+/opt/gabrielandrade/projetos/team-roles/src/main/java/com/ecore/teamroles/model/Role.java
+/opt/gabrielandrade/projetos/team-roles/src/main/java/com/ecore/teamroles/model/BaseEntity.java
+/opt/gabrielandrade/projetos/team-roles/src/main/java/com/ecore/teamroles/controller/RoleRestController.java
