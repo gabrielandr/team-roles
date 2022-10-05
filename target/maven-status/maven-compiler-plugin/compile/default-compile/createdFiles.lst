@@ -1,7 +1,0 @@
-com/ecore/teamroles/repository/RoleRepository.class
-com/ecore/teamroles/service/RoleServiceImpl.class
-com/ecore/teamroles/model/BaseEntity.class
-com/ecore/teamroles/model/Role.class
-com/ecore/teamroles/service/RoleService.class
-com/ecore/teamroles/TeamRolesApplication.class
-com/ecore/teamroles/controller/RoleRestController.class

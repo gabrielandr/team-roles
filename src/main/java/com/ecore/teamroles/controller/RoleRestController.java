@@ -39,17 +39,17 @@ public class RoleRestController {
         return roleService.listRoles();
     }
 
-    @GetMapping(value = "/roles/{roleId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/roles/{roleName}", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
-    public Role getUserByUsername(@PathVariable Long roleId) {
-        Optional<Role> role = roleService.getRoleById(roleId);
+    public Role getUserByUsername(@PathVariable String roleName) {
+        Optional<Role> role = roleService.getRoleByName(roleName);
         if (role.isPresent()) {
             return role.get();
         }
         return null;
     }
 
-    @PostMapping(value = "/addMemberRole")
+    @PostMapping(value = "/addMemberRole", consumes = {MediaType.APPLICATION_JSON_VALUE})
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<Object> addMemberRole(@RequestBody MembershipDto membershipDto) {
         return ResponseEntity.ok(teamMemberRoleService.addMemberRole(membershipDto));

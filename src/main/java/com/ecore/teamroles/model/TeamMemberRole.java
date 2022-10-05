@@ -30,4 +30,10 @@ public class TeamMemberRole extends BaseEntity {
         this.userId = userId;
         this.teamId = teamId;
     }
+
+    public TeamMemberRole(String userId, String teamId, Role role) {
+        this.userId = userId;
+        this.teamId = teamId;
+        this.role = role;
+    }
 }

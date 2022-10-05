@@ -2,7 +2,6 @@ package com.ecore.teamroles.service;
 
 import com.ecore.teamroles.model.Role;
 import com.ecore.teamroles.repository.RoleRepository;
-import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -18,7 +17,7 @@ public class RoleServiceImpl implements RoleService {
 
     private final RoleRepository roleRepository;
 
-    public static final Gson gson = new Gson();
+//    public static final Gson gson = new Gson();
 
     public RoleServiceImpl(RoleRepository roleRepository) {
         this.roleRepository = roleRepository;
@@ -41,5 +40,10 @@ public class RoleServiceImpl implements RoleService {
     @Override
     public Optional<Role> getRoleById(Long roleId) {
         return roleRepository.findById(roleId);
+    }
+
+    @Override
+    public Optional<Role> getRoleByName(String roleName) {
+        return roleRepository.findByName(roleName);
     }
 }

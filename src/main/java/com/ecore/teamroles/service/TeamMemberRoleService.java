@@ -10,5 +10,5 @@ public interface TeamMemberRoleService {
 
     TeamMemberRole addMemberRole(MembershipDto teamMemberRole);
 
-    List<TeamMemberRole> findMemberships(String roleName);
+    List<MembershipDto> findMemberships(String roleName);
 }

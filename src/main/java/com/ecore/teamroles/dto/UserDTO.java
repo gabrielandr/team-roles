@@ -9,12 +9,17 @@ import javax.validation.constraints.NotBlank;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class MembershipDto {
+public class UserDTO {
 
     @NotBlank(message = "User Id cannot be empty")
-    private String userId;
-    @NotBlank(message = "Team Id cannot be empty")
-    private String teamId;
-    @NotBlank(message = "Role name cannot be empty")
-    private String roleName;
+    private String id;
+    private String firstName;
+    private String lastName;
+    private String displayName;
+    private String avatarUrl;
+    private String location;
+
+    public UserDTO(String id) {
+        this.id = id;
+    }
 }

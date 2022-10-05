@@ -13,6 +13,8 @@ public interface RoleService {
 
     Optional<Role> getRoleById(Long roleId);
 
+    Optional<Role> getRoleByName(String roleName);
+
 //    UserRepresentation[] getUsers();
 //
 //    String getUserByUsername(String username);

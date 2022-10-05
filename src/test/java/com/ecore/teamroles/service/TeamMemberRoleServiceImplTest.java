@@ -1,6 +1,8 @@
 package com.ecore.teamroles.service;
 
 import com.ecore.teamroles.dto.MembershipDto;
+import com.ecore.teamroles.dto.TeamDTO;
+import com.ecore.teamroles.dto.UserDTO;
 import com.ecore.teamroles.model.Role;
 import com.ecore.teamroles.model.TeamMemberRole;
 import com.ecore.teamroles.repository.RoleRepository;
@@ -12,15 +14,19 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import javax.validation.ConstraintViolationException;
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Optional;
+import java.util.*;
 
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.when;
 
 @ContextConfiguration(classes = {TeamMemberRoleServiceImpl.class})
 @ExtendWith(SpringExtension.class)
@@ -34,51 +40,81 @@ class TeamMemberRoleServiceImplTest {
     @Autowired
     private TeamMemberRoleServiceImpl teamMemberRoleServiceImpl;
 
-    /**
-     * Method under test: {@link TeamMemberRoleServiceImpl#addMemberRole(MembershipDto)}
-     */
     @Test
     void testAddMemberRole() {
-        when(teamMemberRoleRepository.save((TeamMemberRole) any())).thenReturn(new TeamMemberRole("42", "42"));
-
         Role role = new Role();
-        LocalDateTime atStartOfDayResult = LocalDate.of(1970, 1, 1).atStartOfDay();
+        LocalDateTime atStartOfDayResult = LocalDate.of(2022, 1, 1).atStartOfDay();
         role.setCreatedAt(Date.from(atStartOfDayResult.atZone(ZoneId.of("UTC")).toInstant()));
         role.setId(123L);
-        role.setName("Name");
-        LocalDateTime atStartOfDayResult1 = LocalDate.of(1970, 1, 1).atStartOfDay();
-        role.setUpdatedAt(Date.from(atStartOfDayResult1.atZone(ZoneId.of("UTC")).toInstant()));
-        role.setVersion(1L);
-        Optional<Role> ofResult = Optional.of(role);
-        when(roleRepository.findByName((String) any())).thenReturn(ofResult);
-        teamMemberRoleServiceImpl.addMemberRole(new MembershipDto("42", "42", "Role Name"));
-        verify(teamMemberRoleRepository).save((TeamMemberRole) any());
-        verify(roleRepository).findByName((String) any());
+        role.setName("Tester");
+        Optional<Role> optionalRole = Optional.of(role);
+
+        when(roleRepository.findByName(any())).thenReturn(optionalRole);
+        TeamMemberRole teamMemberRole = new TeamMemberRole("22", "22");
+        teamMemberRole.setRole(optionalRole.get());
+        when(teamMemberRoleRepository.save(any())).thenReturn(teamMemberRole);
+        when(teamMemberRoleRepository.findByRole(any())).thenReturn(Arrays.asList(teamMemberRole));
+
+        List<TeamMemberRole> teamMemberRoleList = teamMemberRoleRepository.findByRole(role);
+        assertEquals(1, teamMemberRoleList.size());
     }
 
-    /**
-     * Method under test: {@link TeamMemberRoleServiceImpl#addMemberRole(MembershipDto)}
-     */
+
     @Test
-    void testAddMemberRole2() {
-        when(teamMemberRoleRepository.save((TeamMemberRole) any()))
-                .thenThrow(new ConstraintViolationException(new HashSet<>()));
+    void testAddMemberRoleError() {
+        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+        Validator validator = factory.getValidator();
+        UserDTO userDTO = new UserDTO();
+        TeamDTO teamDTO = new TeamDTO();
+        MembershipDto membershipDto = new MembershipDto(userDTO, teamDTO, "");
 
-        Role role = new Role();
-        LocalDateTime atStartOfDayResult = LocalDate.of(1970, 1, 1).atStartOfDay();
-        role.setCreatedAt(Date.from(atStartOfDayResult.atZone(ZoneId.of("UTC")).toInstant()));
-        role.setId(123L);
-        role.setName("Name");
-        LocalDateTime atStartOfDayResult1 = LocalDate.of(1970, 1, 1).atStartOfDay();
-        role.setUpdatedAt(Date.from(atStartOfDayResult1.atZone(ZoneId.of("UTC")).toInstant()));
-        role.setVersion(1L);
-        Optional<Role> ofResult = Optional.of(role);
-        when(roleRepository.findByName((String) any())).thenReturn(ofResult);
-        teamMemberRoleServiceImpl.addMemberRole(new MembershipDto("42", "42", "Role Name"));
-        verify(teamMemberRoleRepository).save((TeamMemberRole) any());
-        verify(roleRepository).findByName((String) any());
+        Set<ConstraintViolation<UserDTO>> userViolations = validator.validate(userDTO);
+        assertEquals(1, userViolations.size());
+        Set<ConstraintViolation<TeamDTO>> teamViolations = validator.validate(teamDTO);
+        assertEquals(1, teamViolations.size());
     }
 
+    @Test
+    void testAddMemberRoleDefaultRole() {
+        Role role = new Role();
+        LocalDateTime today = LocalDate.of(2022, 1, 1).atStartOfDay();
+        role.setCreatedAt(Date.from(today.atZone(ZoneId.of("UTC")).toInstant()));
+        role.setId(123L);
+        role.setName("Developer");
+        Optional<Role> optionalRoleToFind = Optional.of(role);
 
+        when(roleRepository.save(any())).thenReturn(optionalRoleToFind);
+        when(roleRepository.findByName(any())).thenReturn(optionalRoleToFind);
+
+        UserDTO userDTO = new UserDTO("371d2ee8-cdf4-48cf-9ddb-04798b79ad9e");
+        TeamDTO teamDTO = new TeamDTO("7676a4bf-adfe-415c-941b-1739af07039b");
+        MembershipDto membershipDto = new MembershipDto(userDTO, teamDTO, "");
+        TeamMemberRole teamMemberRoleToVerify = new TeamMemberRole("22", "22", optionalRoleToFind.get());
+        when(teamMemberRoleRepository.save(any())).thenReturn(teamMemberRoleToVerify);
+        TeamMemberRole teamMemberRoleSaved = teamMemberRoleServiceImpl.addMemberRole(membershipDto);
+
+        assertSame(teamMemberRoleToVerify, teamMemberRoleSaved);
+    }
+
+    @Test
+    void testFindMemberships() {
+        Role role = new Role();
+        LocalDateTime atStartOfDayResult = LocalDate.of(2022, 1, 1).atStartOfDay();
+        role.setCreatedAt(Date.from(atStartOfDayResult.atZone(ZoneId.of("UTC")).toInstant()));
+        role.setId(123L);
+        role.setName("Tester");
+        Optional<Role> optionalRole = Optional.of(role);
+
+        when(roleRepository.findByName(any())).thenReturn(optionalRole);
+        TeamMemberRole teamMemberRole = new TeamMemberRole("371d2ee8-cdf4-48cf-9ddb-04798b79ad9e", "7676a4bf-adfe-415c-941b-1739af07039b");
+        teamMemberRole.setRole(optionalRole.get());
+        when(teamMemberRoleRepository.save(any())).thenReturn(teamMemberRole);
+        when(teamMemberRoleRepository.findByRole(any())).thenReturn(Arrays.asList(teamMemberRole));
+
+
+        List<MembershipDto> teamMemberRoleList = teamMemberRoleServiceImpl.findMemberships(role.getName());
+        assertEquals("371d2ee8-cdf4-48cf-9ddb-04798b79ad9e", teamMemberRoleList.get(0).getUser().getId());
+
+    }
 }
 
